@@ -172,17 +172,6 @@ public class ThirdPersonController : MonoBehaviour
         cc.Move(moviment);
     }
 
-
-    // With the inputs and animations defined, FixedUpdate is responsible for applying movements and actions to the player
-    private void FixedUpdate()
-    {
-
-        
-
-    }
-
-
-    //This function makes the character end his jump if he hits his head on something
     void HeadHittingDetect()
     {
         float headHitDistance = 1.1f;
