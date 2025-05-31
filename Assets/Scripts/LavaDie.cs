@@ -6,6 +6,6 @@ public class LavaDie : MonoBehaviour
     {
         if (!other.transform.CompareTag("Player")) { return; }
 
-        other.transform.GetComponent<RespawnSystem>().Die();
+        other.transform.GetComponent<RespawnSystem>()?.Die();
     }
 }

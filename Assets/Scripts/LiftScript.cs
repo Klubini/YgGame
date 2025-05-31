@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class LiftScript : MonoBehaviour
 {
+    public float speed = 2f;
+    [SerializeField] private bool x;
+    [SerializeField] private bool y;
+
+
     [SerializeField] private Transform point1;
     public bool stayOn1 = true;
     [SerializeField] private Transform point2;
@@ -32,16 +37,18 @@ public class LiftScript : MonoBehaviour
             direction = Direction2;
         }
 
-        if ((transform.position - point1.position).magnitude <= 0.1f)
+
+        if ((transform.position - point1.position).magnitude <= 1f)
         {
             stayOn1 = true;
             stayOn2 = false;
         }
-        else if ((transform.position - point2.position).magnitude <= 0.1f)
+        else if ((transform.position - point2.position).magnitude <= 1f)
         {
             stayOn1 = false;
             stayOn2 = true;
         }
-        transform.position -= Time.deltaTime * 2 * direction;
+        
+        transform.position -= Time.deltaTime * speed * direction;
     }
 }

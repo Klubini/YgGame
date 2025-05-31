@@ -171,7 +171,7 @@ public class ThirdPersonController : MonoBehaviour
     {
         Vector3 ccCenter = transform.TransformPoint(cc.center);
         Debug.DrawRay(ccCenter, Vector3.down);
-        if (Physics.Raycast(ccCenter, Vector3.down,out RaycastHit hitInfo, 44f, LayerMask.GetMask("Lift")))
+        if (Physics.Raycast(ccCenter, Vector3.down,out RaycastHit hitInfo, cc.height / 2f + 1f, LayerMask.GetMask("Lift")))
         {
             LiftScript script = hitInfo.transform.GetComponent<LiftScript>();
             if (liftId != hitInfo.transform.gameObject.GetInstanceID())
@@ -184,11 +184,11 @@ public class ThirdPersonController : MonoBehaviour
 
             if (script.stayOn1)
             {
-                cc.Move(Time.deltaTime * 2 * -script.Direction1);
+                cc.Move(Time.deltaTime * script.speed * -script.Direction1);
             }
             else if (script.stayOn2)
             {
-                cc.Move(Time.deltaTime * 2 * -script.Direction2);
+                cc.Move(Time.deltaTime * script.speed * -script.Direction2);
             }
 
         }

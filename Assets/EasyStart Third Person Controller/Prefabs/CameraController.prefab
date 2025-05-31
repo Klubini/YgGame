@@ -45,9 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78bfe315ac0ad9b4da8c8e1f992d6ccc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clickToMoveCamera: 0
+  clickToMoveCamera: 1
+  canZoom: 1
   sensitivity: 5
-  cameraLimit: {x: -45, y: 40}
+  cameraLimit: {x: -60, y: 60}
 --- !u!1 &7815172744516068119
 GameObject:
   m_ObjectHideFlags: 0
