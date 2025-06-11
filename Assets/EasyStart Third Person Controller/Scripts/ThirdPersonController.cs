@@ -15,7 +15,7 @@ using UnityEngine;
 /// </summary>
 public class ThirdPersonController : MonoBehaviour
 {
-
+    public float speed = 50f;
     [Tooltip("Speed ​​at which the character moves. It is not affected by gravity or jumping.")]
     public float velocity = 5f;
     [Tooltip("This value is added to the speed value while the character is sprinting.")]
@@ -70,13 +70,7 @@ public class ThirdPersonController : MonoBehaviour
         inputVertical = Input.GetAxis("Vertical");
         inputJump = Input.GetAxis("Jump") == 1f;
 
-        // Check if you pressed the crouch input key and change the player's state
-        if ( inputCrouch )
-            isCrouching = !isCrouching;
-
-        // Run and Crouch animation
-        // If dont have animator component, this block wont run
-        if ( cc.isGrounded && animator != null )
+        if ( cc.isGrounded  )
         {
             // Run
             float minimumSpeed = 0.9f;
@@ -88,8 +82,12 @@ public class ThirdPersonController : MonoBehaviour
             isJumping = true;
         }
 
+        
+    }
+
+    void FixedUpdate()
+    {
         HeadHittingDetect();
-        OnLift();
 
         float velocityAdittion = 0;
         if (isSprinting)
@@ -149,6 +147,7 @@ public class ThirdPersonController : MonoBehaviour
 
         Vector3 moviment = verticalDirection + horizontalDirection;
         cc.Move(moviment);
+        OnLift();
     }
 
     void HeadHittingDetect()

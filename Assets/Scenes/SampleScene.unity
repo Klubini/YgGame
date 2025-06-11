@@ -103555,9 +103555,6 @@ PrefabInstance:
       addedObject: {fileID: 1741931086}
     - targetCorrespondingSourceObject: {fileID: 4357118449180629203, guid: 9666f70cf987d53468f39cc47c6bea00, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1741931090}
-    - targetCorrespondingSourceObject: {fileID: 4357118449180629203, guid: 9666f70cf987d53468f39cc47c6bea00, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1741931091}
   m_SourcePrefab: {fileID: 8686905464242370237, guid: 9666f70cf987d53468f39cc47c6bea00, type: 3}
 --- !u!1 &1741931085 stripped
@@ -103577,11 +103574,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dbd62af2a25df34c9a8e8a7bcb2c370, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 100
   velocity: 5
   sprintAdittion: 0
   jumpForce: 18
   jumpTime: 0.85
-  gravity: 9.8
+  gravity: 9.5
 --- !u!143 &1741931087
 CharacterController:
   m_ObjectHideFlags: 0
@@ -103605,7 +103603,7 @@ CharacterController:
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
+  m_MinMoveDistance: 0.0001
   m_Center: {x: 0, y: 0.77, z: 0}
 --- !u!95 &1741931088
 Animator:
@@ -103634,33 +103632,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -3500460014136483016, guid: 9666f70cf987d53468f39cc47c6bea00, type: 3}
   m_PrefabInstance: {fileID: 1741931084}
   m_PrefabAsset: {fileID: 0}
---- !u!54 &1741931090
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1741931085}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!114 &1741931091
 MonoBehaviour:
   m_ObjectHideFlags: 0
