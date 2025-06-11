@@ -146,8 +146,8 @@ public class ThirdPersonController : MonoBehaviour
         Vector3 horizontalDirection = -forward + right;
 
         Vector3 moviment = verticalDirection + horizontalDirection;
-        cc.Move(moviment);
         OnLift();
+        cc.Move(moviment);
     }
 
     void HeadHittingDetect()
