@@ -1,6 +1,4 @@
-﻿
-using UnityEditor.VersionControl;
-using UnityEngine;
+﻿using UnityEngine;
 
 /*
     This file has a commented version with details about how each line works. 
@@ -44,7 +42,11 @@ public class ThirdPersonController : MonoBehaviour
 
     Animator animator;
     CharacterController cc;
+    private Vector3 ccCenter;
 
+    private Vector3 movement;
+    private Vector3 movementWithoutGravity;
+    private Vector3 iceMovement;
     // Lifts
     int liftId;
     Vector3 direction1 = new Vector3(0, 0, 0);
@@ -70,23 +72,24 @@ public class ThirdPersonController : MonoBehaviour
         inputVertical = Input.GetAxis("Vertical");
         inputJump = Input.GetAxis("Jump") == 1f;
 
-        if ( cc.isGrounded  )
+        if (cc.isGrounded)
         {
             // Run
             float minimumSpeed = 0.9f;
-            animator.SetBool("run", cc.velocity.magnitude > minimumSpeed );
+            animator.SetBool("run", cc.velocity.magnitude > minimumSpeed);
         }
 
-        if ( inputJump && cc.isGrounded )
+        if (inputJump && cc.isGrounded)
         {
             isJumping = true;
         }
 
-        
+
     }
 
     void FixedUpdate()
     {
+        ccCenter = transform.TransformPoint(cc.center);
         HeadHittingDetect();
 
         float velocityAdittion = 0;
@@ -145,9 +148,14 @@ public class ThirdPersonController : MonoBehaviour
         Vector3 verticalDirection = Vector3.up * directionY;
         Vector3 horizontalDirection = -forward + right;
 
-        Vector3 moviment = verticalDirection + horizontalDirection;
+        movementWithoutGravity = horizontalDirection;
+        movement = verticalDirection + horizontalDirection;
+
         OnLift();
-        cc.Move(moviment);
+        if (!OnIce())
+        {
+            cc.Move(movement);    
+        }
     }
 
     void HeadHittingDetect()
@@ -168,9 +176,7 @@ public class ThirdPersonController : MonoBehaviour
 
     void OnLift()
     {
-        Vector3 ccCenter = transform.TransformPoint(cc.center);
-        Debug.DrawRay(ccCenter, Vector3.down);
-        if (Physics.Raycast(ccCenter, Vector3.down,out RaycastHit hitInfo, cc.height / 2f + 1f, LayerMask.GetMask("Lift")))
+        if (Physics.Raycast(ccCenter, Vector3.down, out RaycastHit hitInfo, cc.height / 2f + 1f, LayerMask.GetMask("Lift")))
         {
             LiftScript script = hitInfo.transform.GetComponent<LiftScript>();
             if (liftId != hitInfo.transform.gameObject.GetInstanceID())
@@ -193,4 +199,17 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
+    bool OnIce()
+    {
+        if (Physics.Raycast(ccCenter, Vector3.down, out RaycastHit hitInfo, cc.height / 2f + 0.1f, LayerMask.GetMask("Ice")))
+        {
+            if (Mathf.Abs(movementWithoutGravity.magnitude) >= 0.05)
+            {
+                iceMovement = movementWithoutGravity;
+            }
+            cc.Move(iceMovement);
+            return true;
+        }
+        return false;
+    }
 }
