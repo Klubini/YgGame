@@ -4,7 +4,7 @@ public class EndGameScript : MonoBehaviour
 {
     [SerializeField] private CharacterController self;
 
-    private void OggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {

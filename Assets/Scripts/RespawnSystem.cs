@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
+using YG;
 
 public class RespawnSystem : MonoBehaviour
 {
-    [SerializeField] private List<SpawnPoints> spawnPoints;
+    public List<SpawnPoints> spawnPoints;
     private CharacterController self;
 
     private void Awake()
@@ -24,11 +25,6 @@ public class RespawnSystem : MonoBehaviour
         {
             if (spawnPoints[i].saveWasGetted)
             {
-                if (i + 1 > spawnPoints.Count - 1)
-                {
-                    spawnPoints[i].Spawn(self);
-                    return;
-                }
                 if (spawnPoints[i + 1] != null && !spawnPoints[i + 1].saveWasGetted)
                 {
                     spawnPoints[i].Spawn(self);
@@ -36,6 +32,8 @@ public class RespawnSystem : MonoBehaviour
                 }
             }
         }
+
+        YG2.InterstitialAdvShow();
 
         self.enabled = false;
         self.transform.position = new Vector3(0, 2, -14);
