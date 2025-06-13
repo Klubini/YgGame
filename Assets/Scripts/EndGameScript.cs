@@ -1,0 +1,18 @@
+using UnityEngine;
+
+public class EndGameScript : MonoBehaviour
+{
+    [SerializeField] private CharacterController self;
+
+    private void OggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Debug.LogError("Пилик в сохранения! Игра завершена!");
+
+            self.enabled = false;
+            self.transform.position = new Vector3(0, 2, -14);
+            self.enabled = true;
+        }     
+    }
+}
