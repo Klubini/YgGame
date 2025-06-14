@@ -1,4 +1,5 @@
 using UnityEngine;
+using YG;
 
 public class EndGameScript : MonoBehaviour
 {
@@ -8,8 +9,6 @@ public class EndGameScript : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.LogError("Пилик в сохранения! Игра завершена!");
-
             self.enabled = false;
             self.transform.position = new Vector3(0, 2, -14);
             self.enabled = true;

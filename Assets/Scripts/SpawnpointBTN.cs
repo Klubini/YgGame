@@ -12,7 +12,7 @@ public class SpawnpointBTN : MonoBehaviour
 
     private void Start()
     {
-        if (YG2.saves.collects[logic.locationIndex - 1] && !logic.isSecondPart)
+        if (YG2.saves.collects[logic.locationIndex - 1])
         {
             logic.saveWasGetted = true;
             flag.SetBool("getted", true);
