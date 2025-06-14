@@ -1,5 +1,7 @@
-Authorization v1.02
+Authorization v1.021
 EnvirData v1.002
 InterstitialAdv v1.002
+Payments v1.01
+PlayerStats v1.01
 RewardedAdv v1.001
 Storage v1.02

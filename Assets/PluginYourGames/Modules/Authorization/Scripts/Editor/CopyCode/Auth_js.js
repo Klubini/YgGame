@@ -9,10 +9,8 @@ async function InitPlayer() {
 
             player = await ysdk.getPlayer();
 
-            if (!player.isAuthorized()) {
-                await ysdk.auth.openAuthDialog();
-                return InitPlayer().then(resolve);
-            }
+            if (!player.isAuthorized())
+                return Final(NotAuthorized());
 
             const authJson = {
                 "playerAuth": "resolved",
