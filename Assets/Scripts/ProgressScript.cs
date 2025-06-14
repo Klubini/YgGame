@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using YG;
 
 public class ProgressScript : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class ProgressScript : MonoBehaviour
 
     private void Update()
     {
+        progressNumBaseLVL = YG2.saves.currentlvl;
         progressBar.fillAmount = Mathf.Lerp(progressBar.fillAmount, progressNumBaseLVL / 50f, Time.deltaTime);
         lvlInText.text = $"{progressNumBaseLVL}/50";
         if (progressNumBaseLVL == 0 || progressNumBaseLVL >= 49)

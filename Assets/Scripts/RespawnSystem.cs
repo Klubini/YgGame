@@ -21,6 +21,7 @@ public class RespawnSystem : MonoBehaviour
     }
     public void Die()
     {
+        YG2.InterstitialAdvShow();
         for (int i = 0; i < spawnPoints.Count; i++)
         {
             if (spawnPoints[i].saveWasGetted)
@@ -33,7 +34,6 @@ public class RespawnSystem : MonoBehaviour
             }
         }
 
-        YG2.InterstitialAdvShow();
 
         self.enabled = false;
         self.transform.position = new Vector3(0, 2, -14);

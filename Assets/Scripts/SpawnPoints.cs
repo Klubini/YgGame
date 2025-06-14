@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class SpawnPoints : MonoBehaviour
 {
+    public bool isSecondPart = false;
     public int locationIndex = 0;
     public bool saveWasGetted = false;
     [SerializeField] private Transform spawnPoint;
