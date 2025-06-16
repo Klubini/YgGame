@@ -4,6 +4,7 @@ using YG;
 
 public class Skins : MonoBehaviour
 {
+    [SerializeField] private GameObject skinCatalog;
     [SerializeField] private Renderer[] playerMat;
     [SerializeField] private Material newMaterial;
     [SerializeField] private GameObject selfTick;
@@ -100,7 +101,6 @@ public class Skins : MonoBehaviour
         for (int i = 0; i < playerMat.Length; i++)
         {
             playerMat[i].material = newMaterial;
-            Debug.Log(i);
         }
 
         YG2.saves.skinSelectedID = id;
