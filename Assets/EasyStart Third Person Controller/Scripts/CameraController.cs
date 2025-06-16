@@ -1,75 +1,166 @@
 ﻿
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-/*
-    This file has a commented version with details about how each line works. 
-    The commented version contains code that is easier and simpler to read. This file is minified.
-*/
-
-/// <summary>
-/// Camera movement script for third person games.
-/// This Script should not be applied to the camera! It is attached to an empty object and inside
-/// it (as a child object) should be your game's MainCamera.
-/// </summary>
 public class CameraController : MonoBehaviour
 {
-
-    [Tooltip("Enable to move the camera by holding the right mouse button. Does not work with joysticks.")]
+    [Header("Основные настройки")]
+    [Tooltip("Включить вращение при зажатии ПКМ (только для ПК)")]
     public bool clickToMoveCamera = false;
-    [Tooltip("Enable zoom in/out when scrolling the mouse wheel. Does not work with joysticks.")]
+    [Tooltip("Включить зум (колесом мыши или пинч-жестом)")]
     public bool canZoom = true;
     [Space]
-    [Tooltip("The higher it is, the faster the camera moves. It is recommended to increase this value for games that uses joystick.")]
+    [Tooltip("Чувствительность вращения")]
     public float sensitivity = 5f;
+    [Tooltip("Чувствительность зума")]
+    public float zoomSensitivity = 2f;
 
-    [Tooltip("Camera Y rotation limits. The X axis is the maximum it can go up and the Y axis is the maximum it can go down.")]
+    [Header("Ограничения")]
+    [Tooltip("Ограничения по вертикали (min/max)")]
     public Vector2 cameraLimit = new Vector2(-45, 40);
+    [Tooltip("Минимальное и максимальное FOV")]
+    public Vector2 fovLimits = new Vector2(20, 80);
 
-    float mouseX;
-    float mouseY;
-    float offsetDistanceY;
+    [Header("Область вращения (для мобильных)")]
+    [Tooltip("RectTransform области для вращения")]
+    public RectTransform rotationArea;
+    [Tooltip("Игнорировать UI элементы при вращении")]
+    public bool ignoreUI = true;
 
-    Transform player;
+    private float mouseX;
+    private float mouseY;
+    private float offsetDistanceY;
+    private Transform player;
+    private Vector2 previousTouchPosition;
+    private float initialFingersDistance;
+    private float initialFOV;
 
     void Start()
     {
-
         player = GameObject.FindWithTag("Player").transform;
         offsetDistanceY = transform.position.y;
 
-        // Lock and hide cursor with option isn't checked
-        if ( ! clickToMoveCamera )
+        if (!clickToMoveCamera && Application.isEditor)
         {
-            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-            UnityEngine.Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
-
     }
-
 
     void Update()
     {
-
-        // Follow player - camera offset
         transform.position = player.position + new Vector3(0, offsetDistanceY, 0);
 
-        // Set camera zoom when mouse wheel is scrolled
-        if( canZoom && Input.GetAxis("Mouse ScrollWheel") != 0 )
-            Camera.main.fieldOfView -= Input.GetAxis("Mouse ScrollWheel") * sensitivity * 2;
-        // You can use Mathf.Clamp to set limits on the field of view
+        HandleZoom();
+        HandleRotation();
+    }
 
-        // Checker for right click to move camera
-        if ( clickToMoveCamera )
-            if (Input.GetAxisRaw("Fire2") == 0)
-                return;
+    private void HandleZoom()
+    {
+        if (!canZoom) return;
+
+        // Для ПК - колесо мыши
+        if (Input.GetAxis("Mouse ScrollWheel") != 0)
+        {
+            Camera.main.fieldOfView -= Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * 10;
+            Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, fovLimits.x, fovLimits.y);
+        }
+
+        // Для мобильных - пинч-жест
+        if (Input.touchCount == 2)
+        {
+            Touch touch1 = Input.GetTouch(0);
+            Touch touch2 = Input.GetTouch(1);
+
+            if (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
+            {
+                initialFingersDistance = Vector2.Distance(touch1.position, touch2.position);
+                initialFOV = Camera.main.fieldOfView;
+            }
+            else if (touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved)
+            {
+                float currentFingersDistance = Vector2.Distance(touch1.position, touch2.position);
+                float zoomFactor = initialFingersDistance / currentFingersDistance;
+                Camera.main.fieldOfView = Mathf.Clamp(initialFOV * zoomFactor, fovLimits.x, fovLimits.y);
+            }
+        }
+    }
+
+    private void HandleRotation()
+    {
+        bool shouldRotate = false;
+
+        // Для ПК - ПКМ или ЛКМ в области
+        if (!Application.isMobilePlatform)
+        {
+            if (clickToMoveCamera && Input.GetAxisRaw("Fire2") != 0)
+            {
+                shouldRotate = true;
+            }
+            else if (rotationArea != null && Input.GetMouseButton(0))
+            {
+                if (IsPointerInRotationArea() && (!ignoreUI || !IsPointerOverUIElement()))
+                {
+                    shouldRotate = true;
+                }
+            }
+        }
+        // Для мобильных - тач в области
+        else if (Input.touchCount == 1)
+        {
+            Touch touch = Input.GetTouch(0);
             
-        // Calculate new position
-        mouseX += Input.GetAxis("Mouse X") * sensitivity;
-        mouseY += Input.GetAxis("Mouse Y") * sensitivity;
-        // Apply camera limts
-        mouseY = Mathf.Clamp(mouseY, cameraLimit.x, cameraLimit.y);
+            if (touch.phase == TouchPhase.Moved && rotationArea != null)
+            {
+                if (IsPointerInRotationArea(touch.position) && (!ignoreUI || !IsPointerOverUIElement(touch.fingerId)))
+                {
+                    shouldRotate = true;
+                    previousTouchPosition = touch.position;
+                }
+            }
+        }
 
-        transform.rotation = Quaternion.Euler(-mouseY, mouseX, 0);
+        if (shouldRotate)
+        {
+            Vector2 delta = Vector2.zero;
+            
+            if (Application.isMobilePlatform && Input.touchCount == 1)
+            {
+                Touch touch = Input.GetTouch(0);
+                delta = touch.position - previousTouchPosition;
+                previousTouchPosition = touch.position;
+            }
+            else
+            {
+                delta = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+            }
 
+            mouseX += delta.x * sensitivity * Time.deltaTime * 60;
+            mouseY -= delta.y * sensitivity * Time.deltaTime * 60;
+            mouseY = Mathf.Clamp(mouseY, cameraLimit.x, cameraLimit.y);
+            transform.rotation = Quaternion.Euler(mouseY, mouseX, 0);
+        }
+    }
+
+    private bool IsPointerInRotationArea(Vector2 screenPosition = default)
+    {
+        if (rotationArea == null) return false;
+        
+        if (screenPosition == default)
+            screenPosition = Input.mousePosition;
+
+        return RectTransformUtility.RectangleContainsScreenPoint(
+            rotationArea, 
+            screenPosition, 
+            null
+        );
+    }
+
+    private bool IsPointerOverUIElement(int fingerId = -1)
+    {
+        if (fingerId >= 0)
+            return EventSystem.current.IsPointerOverGameObject(fingerId);
+        else
+            return EventSystem.current.IsPointerOverGameObject();
     }
 }
