@@ -4,7 +4,7 @@ namespace YG
     {
         // Lvls
         public int currentlvl = 0;
-        public bool[] collects = new bool[54];
+        public bool[] collects = new bool[70];
         public bool isSecondPart = false;
 
         // Skins
