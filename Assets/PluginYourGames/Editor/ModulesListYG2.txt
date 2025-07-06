@@ -1,4 +1,4 @@
-Authorization v1.021
+Authorization v1.022
 EnvirData v1.002
 InterstitialAdv v1.002
 Payments v1.01

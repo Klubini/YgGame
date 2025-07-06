@@ -13,6 +13,7 @@
 /// </summary>
 public class ThirdPersonController : MonoBehaviour
 {
+    public FixedJoystick joystick;
     public float speed = 50f;
     [Tooltip("Speed ​​at which the character moves. It is not affected by gravity or jumping.")]
     public float velocity = 5f;
@@ -87,6 +88,14 @@ public class ThirdPersonController : MonoBehaviour
 
     }
 
+    public void MobileJump()
+    {
+        if (cc.isGrounded)
+        {
+            isJumping = true;
+        }
+    }
+
     void FixedUpdate()
     {
         ccCenter = transform.TransformPoint(cc.center);
@@ -99,8 +108,19 @@ public class ThirdPersonController : MonoBehaviour
             velocityAdittion = -(velocity * 0.50f); // -50% velocity
 
         // Direction movement
-        float directionX = inputHorizontal * (velocity + velocityAdittion) * Time.deltaTime;
-        float directionZ = inputVertical * (velocity + velocityAdittion) * Time.deltaTime;
+
+        float directionX;
+        float directionZ;
+        if (joystick.Horizontal != 0 || joystick.Vertical != 0)
+        {
+            directionX = joystick.Horizontal * (velocity + velocityAdittion) * Time.deltaTime;
+            directionZ = joystick.Vertical * (velocity + velocityAdittion) * Time.deltaTime;
+        }
+        else
+        {
+            directionX = inputHorizontal * (velocity + velocityAdittion) * Time.deltaTime;
+            directionZ = inputVertical * (velocity + velocityAdittion) * Time.deltaTime;
+        }
         float directionY = 0;
 
         if (isJumping)
@@ -154,7 +174,7 @@ public class ThirdPersonController : MonoBehaviour
         OnLift();
         if (!OnIce())
         {
-            cc.Move(movement);    
+            cc.Move(movement);
         }
     }
 

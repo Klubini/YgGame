@@ -4,12 +4,24 @@ using YG;
 
 public class RespawnSystem : MonoBehaviour
 {
+    [SerializeField] private AudioSource dieSfx;
     public List<SpawnPoints> spawnPoints;
     private CharacterController self;
+    private bool soundCanBe = false;
 
     private void Awake()
     {
         self = GetComponent<CharacterController>();
+    }
+
+    void Start()
+    {
+        Invoke("BugFixer", 1f);
+    }
+
+    private void BugFixer()
+    {
+        soundCanBe = true;
     }
 
     private void Update()
@@ -22,6 +34,10 @@ public class RespawnSystem : MonoBehaviour
     public void Die()
     {
         YG2.InterstitialAdvShow();
+        if (soundCanBe)
+        {
+            dieSfx.Play();
+        }
         for (int i = 0; i < spawnPoints.Count; i++)
         {
             if (spawnPoints[i].saveWasGetted)

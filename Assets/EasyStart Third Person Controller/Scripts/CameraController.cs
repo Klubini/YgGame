@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class CameraController : MonoBehaviour
@@ -27,6 +26,10 @@ public class CameraController : MonoBehaviour
     [Tooltip("Игнорировать UI элементы при вращении")]
     public bool ignoreUI = true;
 
+    [Header("Джойстики (для мобильных)")]
+    [Tooltip("RectTransform джойстиков, которые не должны влиять на камеру")]
+    public RectTransform[] joysticks;
+
     private float mouseX;
     private float mouseY;
     private float offsetDistanceY;
@@ -34,13 +37,15 @@ public class CameraController : MonoBehaviour
     private Vector2 previousTouchPosition;
     private float initialFingersDistance;
     private float initialFOV;
+    private bool isRotating = false;
+    private int? rotationFingerId = null; // ID пальца для вращения
 
     void Start()
     {
         player = GameObject.FindWithTag("Player").transform;
         offsetDistanceY = transform.position.y;
 
-        if (!clickToMoveCamera && Application.isEditor)
+        if (!clickToMoveCamera && Application.isEditor && !Application.isMobilePlatform)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -66,74 +71,134 @@ public class CameraController : MonoBehaviour
             Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, fovLimits.x, fovLimits.y);
         }
 
-        // Для мобильных - пинч-жест
-        if (Input.touchCount == 2)
-        {
-            Touch touch1 = Input.GetTouch(0);
-            Touch touch2 = Input.GetTouch(1);
+        // Для мобильных - пинч-жест (только если нет активного вращения)
+        // if (Input.touchCount == 2 && !isRotating)
+        // {
+        //     Touch touch1 = Input.GetTouch(0);
+        //     Touch touch2 = Input.GetTouch(1);
 
-            if (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
-            {
-                initialFingersDistance = Vector2.Distance(touch1.position, touch2.position);
-                initialFOV = Camera.main.fieldOfView;
-            }
-            else if (touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved)
-            {
-                float currentFingersDistance = Vector2.Distance(touch1.position, touch2.position);
-                float zoomFactor = initialFingersDistance / currentFingersDistance;
-                Camera.main.fieldOfView = Mathf.Clamp(initialFOV * zoomFactor, fovLimits.x, fovLimits.y);
-            }
-        }
+        //     // Пропускаем касания джойстиков
+        //     if (IsJoystickTouch(touch1.position) || IsJoystickTouch(touch2.position))
+        //         return;
+
+        //     if (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
+        //     {
+        //         initialFingersDistance = Vector2.Distance(touch1.position, touch2.position);
+        //         initialFOV = Camera.main.fieldOfView;
+        //     }
+        //     else if (touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved)
+        //     {
+        //         float currentFingersDistance = Vector2.Distance(touch1.position, touch2.position);
+        //         float zoomFactor = initialFingersDistance / currentFingersDistance;
+        //         Camera.main.fieldOfView = Mathf.Clamp(initialFOV * zoomFactor, fovLimits.x, fovLimits.y);
+        //     }
+        // }
     }
 
     private void HandleRotation()
     {
-        bool shouldRotate = false;
-
-        // Для ПК - ПКМ или ЛКМ в области
-        if (!Application.isMobilePlatform)
+        if (Application.isMobilePlatform)
         {
-            if (clickToMoveCamera && Input.GetAxisRaw("Fire2") != 0)
+            HandleMobileRotation();
+        }
+        else
+        {
+            HandlePCRotation();
+        }
+    }
+
+    private void HandleMobileRotation()
+    {
+        // Сбрасываем вращение, если палец убран
+        if (rotationFingerId.HasValue)
+        {
+            bool fingerStillActive = false;
+            foreach (Touch touch in Input.touches)
             {
-                shouldRotate = true;
-            }
-            else if (rotationArea != null && Input.GetMouseButton(0))
-            {
-                if (IsPointerInRotationArea() && (!ignoreUI || !IsPointerOverUIElement()))
+                if (touch.fingerId == rotationFingerId.Value)
                 {
-                    shouldRotate = true;
+                    fingerStillActive = true;
+                    break;
+                }
+            }
+            
+            if (!fingerStillActive)
+            {
+                isRotating = false;
+                rotationFingerId = null;
+            }
+        }
+
+        // Обрабатываем активное вращение
+        if (isRotating && rotationFingerId.HasValue)
+        {
+            Touch? rotationTouch = null;
+            foreach (Touch touch in Input.touches)
+            {
+                if (touch.fingerId == rotationFingerId.Value)
+                {
+                    rotationTouch = touch;
+                    break;
+                }
+            }
+
+            if (rotationTouch.HasValue)
+            {
+                Touch touch = rotationTouch.Value;
+                Vector2 delta = touch.position - previousTouchPosition;
+                previousTouchPosition = touch.position;
+
+                mouseX += delta.x * sensitivity * Time.deltaTime * 60;
+                mouseY -= delta.y * sensitivity * Time.deltaTime * 60;
+                mouseY = Mathf.Clamp(mouseY, cameraLimit.x, cameraLimit.y);
+                transform.rotation = Quaternion.Euler(mouseY, mouseX, 0);
+            }
+        }
+        // Поиск нового касания для вращения
+        else
+        {
+            foreach (Touch touch in Input.touches)
+            {
+                // Пропускаем касания джойстиков
+                if (IsJoystickTouch(touch.position)) continue;
+                
+                // Игнорируем касания в UI
+                if (ignoreUI && IsPointerOverUIElement(touch.fingerId)) continue;
+                
+                // Проверяем область вращения
+                if (rotationArea != null && !IsPointerInRotationArea(touch.position)) continue;
+                
+                // Начинаем вращение при движении нового пальца
+                if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved)
+                {
+                    isRotating = true;
+                    rotationFingerId = touch.fingerId;
+                    previousTouchPosition = touch.position;
+                    break; // Берем только одно касание для вращения
                 }
             }
         }
-        // Для мобильных - тач в области
-        else if (Input.touchCount == 1)
+    }
+
+    private void HandlePCRotation()
+    {
+        bool shouldRotate = false;
+
+        if (clickToMoveCamera && Input.GetAxisRaw("Fire2") != 0)
         {
-            Touch touch = Input.GetTouch(0);
-            
-            if (touch.phase == TouchPhase.Moved && rotationArea != null)
+            shouldRotate = true;
+        }
+        else if (rotationArea != null && Input.GetMouseButton(0))
+        {
+            if (IsPointerInRotationArea() && (!ignoreUI || !IsPointerOverUIElement()))
             {
-                if (IsPointerInRotationArea(touch.position) && (!ignoreUI || !IsPointerOverUIElement(touch.fingerId)))
-                {
-                    shouldRotate = true;
-                    previousTouchPosition = touch.position;
-                }
+                shouldRotate = true;
             }
         }
 
         if (shouldRotate)
         {
-            Vector2 delta = Vector2.zero;
-            
-            if (Application.isMobilePlatform && Input.touchCount == 1)
-            {
-                Touch touch = Input.GetTouch(0);
-                delta = touch.position - previousTouchPosition;
-                previousTouchPosition = touch.position;
-            }
-            else
-            {
-                delta = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-            }
+            Vector2 delta = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 
             mouseX += delta.x * sensitivity * Time.deltaTime * 60;
             mouseY -= delta.y * sensitivity * Time.deltaTime * 60;
@@ -162,5 +227,22 @@ public class CameraController : MonoBehaviour
             return EventSystem.current.IsPointerOverGameObject(fingerId);
         else
             return EventSystem.current.IsPointerOverGameObject();
+    }
+
+    // Проверка, находится ли касание в зоне джойстика
+    private bool IsJoystickTouch(Vector2 position)
+    {
+        if (joysticks == null || joysticks.Length == 0) 
+            return false;
+
+        foreach (RectTransform joystick in joysticks)
+        {
+            if (joystick != null && 
+                RectTransformUtility.RectangleContainsScreenPoint(joystick, position, null))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

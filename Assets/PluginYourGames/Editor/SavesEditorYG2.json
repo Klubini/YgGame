@@ -7,8 +7,8 @@
         false,
         false
     ],
-    "idSave": 34,
-    "currentlvl": 18,
+    "idSave": 11,
+    "currentlvl": 7,
     "collects": [
         true,
         true,
@@ -17,17 +17,17 @@
         true,
         true,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         false,
         false,
         false,
@@ -82,13 +82,13 @@
         false
     ],
     "isSecondPart": false,
-    "skinSelectedID": 1,
+    "skinSelectedID": 3,
     "unlockedSkins": [
         false,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true
+        false,
+        false
     ]
 }
