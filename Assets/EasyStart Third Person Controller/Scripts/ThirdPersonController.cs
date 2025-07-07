@@ -13,6 +13,8 @@
 /// </summary>
 public class ThirdPersonController : MonoBehaviour
 {
+    [HideInInspector] public bool live = true;
+
     public FixedJoystick joystick;
     public float speed = 50f;
     [Tooltip("Speed ​​at which the character moves. It is not affected by gravity or jumping.")]
@@ -174,7 +176,10 @@ public class ThirdPersonController : MonoBehaviour
         OnLift();
         if (!OnIce())
         {
-            cc.Move(movement);
+            if (live)
+            {
+                cc.Move(movement);
+            }
         }
     }
 
@@ -207,7 +212,8 @@ public class ThirdPersonController : MonoBehaviour
                 direction2 = script.Direction2;
             }
 
-            if (script.stayOn1)
+            if (!live) { return; }
+             if (script.stayOn1)
             {
                 cc.Move(Time.deltaTime * script.speed * -script.Direction1);
             }
@@ -227,6 +233,8 @@ public class ThirdPersonController : MonoBehaviour
             {
                 iceMovement = movementWithoutGravity;
             }
+
+            if (!live) { return true; }
             cc.Move(iceMovement);
             return true;
         }

@@ -17,7 +17,7 @@ public class SpawnpointBTN : MonoBehaviour
             logic.saveWasGetted = true;
             flag.SetBool("getted", true);
             ProgressScript.progressNumBaseLVL++;
-            respawn.Die();
+            respawn.RespawnBtnPressed();
         }
     }
     private void OnTriggerEnter(Collider other)

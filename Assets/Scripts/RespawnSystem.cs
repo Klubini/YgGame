@@ -5,9 +5,12 @@ using YG;
 public class RespawnSystem : MonoBehaviour
 {
     [SerializeField] private AudioSource dieSfx;
+    [SerializeField] private GameObject dieMenu;
     public List<SpawnPoints> spawnPoints;
+    public ThirdPersonController controller;
     private CharacterController self;
     private bool soundCanBe = false;
+    private bool died = false;
 
     private void Awake()
     {
@@ -33,12 +36,23 @@ public class RespawnSystem : MonoBehaviour
     }
     public void Die()
     {
-        YG2.InterstitialAdvShow();
+        if (died) { return; }
+
+        died = true;
+        controller.live = false;
+        dieMenu.SetActive(true);
         if (soundCanBe)
         {
             dieSfx.Play();
         }
-        for (int i = 0; i < spawnPoints.Count; i++)
+    }
+
+    public void RespawnBtnPressed()
+    {
+        died = false;
+        controller.live = true;
+        YG2.InterstitialAdvShow();
+                for (int i = 0; i < spawnPoints.Count; i++)
         {
             if (spawnPoints[i].saveWasGetted)
             {
@@ -49,7 +63,6 @@ public class RespawnSystem : MonoBehaviour
                 }
             }
         }
-
 
         self.enabled = false;
         self.transform.position = new Vector3(0, 2, -14);
